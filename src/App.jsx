@@ -7,22 +7,22 @@ const PARKS = {
       "Main Street": ["Disneyland Railroad", "Main Street Vehicles"],
       "Adventureland": ["Indiana Jones Adventure", "Jungle Cruise"],
       "Bayou Country": ["Davy Crockett's Explorer Canoes", "Many Adventures of Winnie the Pooh", "Tiana's Bayou Adventure"],
-      "Fantasyland": ["Alice in Wonderland", "Casey Jr Circus Train", "Dumbo", "it's a small world", "King Arthur Carousel", "Mad Tea Party", "Matterhorn", "Mr Toad's Wild Ride", "Peter Pan's Flight", "Pinocchio's Daring Journey", "Snow White's Enchanted Wish", "Storybook Land Canal Boats"],
+      "Fantasyland": ["Alice in Wonderland", "Casey Jr. Circus Train", "Dumbo", "it's a small world", "King Arthur Carrousel", "Mad Tea Party", "Matterhorn", "Mr Toad's Wild Ride", "Peter Pan's Flight", "Pinocchio's Daring Journey", "Snow White's Enchanted Wish", "Storybook Land Canal Boats"],
       "Frontierland": ["Big Thunder Mountain Railroad", "Mark Twain River Boat", "Sailing Ship Columbia"],
       "Galaxy's Edge": ["Millennium Falcon Smugglers Run", "Star Wars: Rise of the Resistance"],
       "Mickey's ToonTown": ["Chip n Dale's Gadget Coaster", "Mickey & Minnie's Runaway Railway", "Roger Rabbit's Cartoon Spin"],
       "New Orleans Square": ["Haunted Mansion", "Pirates of the Caribbean"],
-      "Tomorrowland": ["Astro Orbiter", "Autotopia", "Buzz Lightyear", "Disneyland Monorail", "Finding Nemo", "Space Mountain", "Star Tours"],
+      "Tomorrowland": ["Astro Orbitor", "Autopia", "Buzz Lightyear", "Disneyland Monorail", "Finding Nemo", "Space Mountain", "Star Tours"],
     },
   },
   dca: {
     name: "Disney California Adventure", icon: "🎡",
     lands: {
       "Avengers Campus": ["Guardians", "Web Slingers"],
-      "Cars Land": ["Luigis", "Radiator Springs Racers", "Maters"],
+      "Cars Land": ["Luigi's Rollickin' Roadsters", "Radiator Springs Racers", "Mater's Junkyard Jamboree"],
       "Grizzly Peak": ["Soarin", "Grizzly River Run"],
-      "Paradise Gardens": ["Goofy's Sky School", "Golden Zephyrs", "Jumpin Jellyfish", "Silly Symphony Swings", "Little Mermaid"],
-      "Pixar Pier": ["Inside Out Emotional Whirlwind", "Pixar Pal Around", "Toy Story Midway Mania", "Jessie's Critter Carousel", "Incredicoaster"],
+      "Paradise Gardens": ["Goofy's Sky School", "Golden Zephyr", "Jumpin' Jellyfish", "Silly Symphony Swings", "Little Mermaid"],
+      "Pixar Pier": ["Inside Out Emotional Whirlwind", "Pixar Pal-A-Round – Non-Swinging", "Toy Story Midway Mania!", "Jessie's Critter Carousel", "Incredicoaster"],
       "Hollywood Land": ["Monsters, Inc. Mike & Sulley to the Rescue!"],
     },
   },
@@ -32,9 +32,9 @@ const LIGHTNING_LANE_RIDES = new Set([
   "disneyland-Indiana Jones Adventure", "disneyland-Tiana's Bayou Adventure", "disneyland-it's a small world",
   "disneyland-Matterhorn", "disneyland-Big Thunder Mountain Railroad", "disneyland-Millennium Falcon Smugglers Run",
   "disneyland-Mickey & Minnie's Runaway Railway", "disneyland-Roger Rabbit's Cartoon Spin", "disneyland-Space Mountain",
-  "disneyland-Buzz Lightyear", "disneyland-Autotopia", "disneyland-Star Tours", "disneyland-Haunted Mansion",
+  "disneyland-Buzz Lightyear", "disneyland-Autopia", "disneyland-Star Tours", "disneyland-Haunted Mansion",
   "disneyland-Star Wars: Rise of the Resistance",
-  "dca-Guardians", "dca-Web Slingers", "dca-Incredicoaster", "dca-Toy Story Midway Mania",
+  "dca-Guardians", "dca-Web Slingers", "dca-Incredicoaster", "dca-Toy Story Midway Mania!",
   "dca-Soarin", "dca-Grizzly River Run", "dca-Goofy's Sky School",
   "dca-Radiator Springs Racers",
   "dca-Little Mermaid",
@@ -564,7 +564,6 @@ export default function DisneyRideTracker() {
       {view === "history" && (
         <div style={{ padding: "0 16px 80px" }}>
           <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 12 }}>Personal Records</div>
-
           {(() => {
             const pbEntries = Object.entries(personalBests);
             const pbCount = pbEntries.length;
@@ -575,22 +574,13 @@ export default function DisneyRideTracker() {
                 <div style={{ fontSize: 13, marginTop: 4 }}>Complete rides to set your best times.</div>
               </div>
             );
-
             const times = pbEntries.map(([, v]) => v.time);
             const fastest = Math.min(...times);
             const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
             const fastestRide = ALL_RIDES.find(r => r.id === pbEntries.find(([, v]) => v.time === fastest)?.[0]);
-
             const dlRides = ALL_RIDES.filter(r => r.park === "disneyland");
             const dcaRides = ALL_RIDES.filter(r => r.park === "dca");
-
-            const fmtPB = (s) => {
-              if (s < 60) return `${s}s`;
-              const m = Math.floor(s / 60);
-              const sec = s % 60;
-              return sec > 0 ? `${m}m ${sec}s` : `${m}m`;
-            };
-
+            const fmtPB = (s) => { if (s < 60) return `${s}s`; const m = Math.floor(s / 60); const sec = s % 60; return sec > 0 ? `${m}m ${sec}s` : `${m}m`; };
             const renderParkSection = (parkRides, parkName, parkIcon) => {
               const lands = {};
               parkRides.forEach(r => { if (!lands[r.land]) lands[r.land] = []; lands[r.land].push(r); });
@@ -603,23 +593,12 @@ export default function DisneyRideTracker() {
                       {rides.map(ride => {
                         const pb = personalBests[ride.id];
                         return (
-                          <div key={ride.id} style={{
-                            padding: "12px 14px", marginBottom: 4, borderRadius: 10,
-                            background: pb ? "#f0fdf4" : "#f2f2f7",
-                            border: `1px solid ${pb ? "#bbf7d0" : "#e5e5ea"}`,
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
-                          }}>
+                          <div key={ride.id} style={{ padding: "12px 14px", marginBottom: 4, borderRadius: 10, background: pb ? "#f0fdf4" : "#f2f2f7", border: `1px solid ${pb ? "#bbf7d0" : "#e5e5ea"}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 15, fontWeight: 600, color: pb ? "#1c1c1e" : "#aeaeb2", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {pb ? "🏆 " : ""}{ride.name}
-                              </div>
-                              {pb && <div style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>
-                                Set {new Date(pb.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                              </div>}
+                              <div style={{ fontSize: 15, fontWeight: 600, color: pb ? "#1c1c1e" : "#aeaeb2", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pb ? "🏆 " : ""}{ride.name}</div>
+                              {pb && <div style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>Set {new Date(pb.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
                             </div>
-                            <div style={{ fontWeight: 800, fontSize: pb ? 18 : 14, color: pb ? "#16a34a" : "#d1d1d6", flexShrink: 0, marginLeft: 10 }}>
-                              {pb ? fmtPB(pb.time) : "—"}
-                            </div>
+                            <div style={{ fontWeight: 800, fontSize: pb ? 18 : 14, color: pb ? "#16a34a" : "#d1d1d6", flexShrink: 0, marginLeft: 10 }}>{pb ? fmtPB(pb.time) : "—"}</div>
                           </div>
                         );
                       })}
@@ -628,7 +607,6 @@ export default function DisneyRideTracker() {
                 </div>
               );
             };
-
             return <>
               <div style={{ padding: 14, marginBottom: 14, borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a" }}>
                 <div style={{ display: "flex", gap: 20 }}>
@@ -647,14 +625,10 @@ export default function DisneyRideTracker() {
                   </div>
                 </div>
               </div>
-
               {renderParkSection(dlRides, "Disneyland Park", "🏰")}
               {renderParkSection(dcaRides, "Disney California Adventure", "🎡")}
-
               {!confirmReset ? (
-                <button onClick={() => setConfirmReset(true)} style={{ width: "100%", marginTop: 12, padding: "13px 0", borderRadius: 12, border: "1px solid #fecaca", background: "#fef2f2", color: "#ef4444", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                  Reset All Records
-                </button>
+                <button onClick={() => setConfirmReset(true)} style={{ width: "100%", marginTop: 12, padding: "13px 0", borderRadius: 12, border: "1px solid #fecaca", background: "#fef2f2", color: "#ef4444", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Reset All Records</button>
               ) : (
                 <div style={{ marginTop: 12, padding: 14, borderRadius: 12, background: "#fef2f2", border: "1px solid #fecaca", textAlign: "center" }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#ef4444", marginBottom: 10 }}>Clear all personal records? This cannot be undone.</div>
