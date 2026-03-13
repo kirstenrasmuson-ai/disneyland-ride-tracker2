@@ -222,6 +222,23 @@ export default function DisneyRideTracker() {
   const mm = Math.floor(tick / 60), ss = tick % 60;
 
   const B = (bg, fg, x = {}) => ({ padding: "10px 16px", borderRadius: 10, border: "none", background: bg, color: fg, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...x });
+
+  const shareRide = useCallback(async (rideName, land, parkName, rideNum, isLL, llNum) => {
+    const parkEmoji = parkName === "Disneyland Park" ? "🏰" : "🎡";
+    const llText = isLL ? ` · ⚡ Lightning Lane #${llNum}` : "";
+    const text = `🎢 Just rode ${rideName} at ${parkEmoji} ${parkName}!${rideNum ? ` · Ride #${rideNum} of ${ALL_RIDES.length}` : ""}${llText}\n\n#Disneyland #EveryRideDLR @RideEvery\n\nHelp me support @GKTWVillage by donating at the link below.\n\nhttps://give.gktw.org/fundraiser/7070034`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    }
+    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(xUrl, "_blank", "width=550,height=420");
+  }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff", color: "#1c1c1e", fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <style>{`
@@ -274,6 +291,7 @@ export default function DisneyRideTracker() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={doneRide} style={B("#34c759", "#fff", { flex: 1, fontSize: 16 })}>✓ Complete</button>
+            <button onClick={() => { const llCount = Object.values(rideLog).reduce((s, e) => s + e.filter(x => x.lightningLane).length, 0) + (window._ll ? 1 : 0); shareRide(info?.name, info?.land, info?.parkName, allDone + 1, window._ll, llCount); }} style={B("#1d9bf0", "#fff", { padding: "10px 14px" })}>𝕏</button>
             <button onClick={cancelRide} style={B("#f2f2f7", "#8e8e93", { border: "1px solid #d1d1d6" })}>✕</button>
           </div>
         </div>
@@ -414,10 +432,11 @@ export default function DisneyRideTracker() {
                     </div>
                     <button onClick={() => delEntry(rid, idx)} style={{ background: "none", border: "none", color: "#c7c7cc", cursor: "pointer", fontSize: 16 }}>✕</button>
                   </div>
-                  <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 13 }}>
+                  <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 13, alignItems: "center" }}>
                     <div><span style={{ color: "#8e8e93" }}>Start </span><span style={{ fontWeight: 600 }}>{fmtTime(e.start)}</span></div>
                     <div><span style={{ color: "#8e8e93" }}>End </span><span style={{ fontWeight: 600 }}>{fmtTime(e.end)}</span></div>
                     <div><span style={{ color: "#8e8e93" }}>Dur </span><span style={{ fontWeight: 600 }}>{fmtDur(e.start, e.end)}</span></div>
+                    <button onClick={() => { const llNum = e.lightningLane ? Object.entries(rideLog).flatMap(([id, ents]) => ents.filter(x => x.lightningLane).map(x => x)).filter(x => new Date(x.end) <= new Date(e.end)).length : 0; shareRide(r?.name, r?.land, r?.parkName, null, e.lightningLane, llNum); }} style={{ marginLeft: "auto", padding: "4px 10px", borderRadius: 6, border: "1px solid #d1d1d6", background: "#fff", color: "#1d9bf0", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>𝕏 Share</button>
                   </div>
                 </div>
               ))
