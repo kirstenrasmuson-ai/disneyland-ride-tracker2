@@ -216,17 +216,19 @@ export default function DisneyRideTracker() {
   const ridden = new Set(Object.keys(rideLog));
   const totalRides = Object.values(rideLog).reduce((s, e) => s + e.length, 0);
   const totalLL = Object.values(rideLog).reduce((s, e) => s + e.filter(x => x.lightningLane).length, 0);
+  const openRides = ALL_RIDES.length - closed.size;
+  const riddenCount = ALL_RIDES.filter(r => ridden.has(r.id)).length;
   const allDone = ALL_RIDES.filter(r => ridden.has(r.id) || closed.has(r.id)).length;
-  const pct = ALL_RIDES.length > 0 ? (allDone / ALL_RIDES.length) * 100 : 0;
+  const pct = openRides > 0 ? (riddenCount / openRides) * 100 : 0;
   const info = activeRide ? ALL_RIDES.find(r => r.id === activeRide) : null;
   const mm = Math.floor(tick / 60), ss = tick % 60;
 
   const B = (bg, fg, x = {}) => ({ padding: "10px 16px", borderRadius: 10, border: "none", background: bg, color: fg, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...x });
 
-  const shareRide = useCallback((rideName, land, parkName, rideNum, isLL, llNum) => {
+  const shareRide = useCallback((rideName, land, parkName, rideNum, isLL, llNum, totalOpen) => {
     const parkEmoji = parkName === "Disneyland Park" ? "🏰" : "🎡";
     const llText = isLL ? ` · ⚡ Lightning Lane #${llNum}` : "";
-    const text = `🎢 Just rode ${rideName} at ${parkEmoji} ${parkName}!${rideNum ? ` · Ride #${rideNum} of ${ALL_RIDES.length}` : ""}${llText}\n\n#Disneyland #EveryRideDLR @RideEvery\n\nHelp me support @GKTWVillage by donating at the link below.\n\nhttps://give.gktw.org/fundraiser/7070034`;
+    const text = `🎢 Just rode ${rideName} at ${parkEmoji} ${parkName}!${rideNum ? ` · Ride #${rideNum} of ${totalOpen}` : ""}${llText}\n\n#Disneyland #EveryRideDLR @RideEvery\n\nHelp me support @GKTWVillage by donating at the link below.\n\nhttps://give.gktw.org/fundraiser/7070034`;
     const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(xUrl, "_blank");
   }, []);
@@ -244,7 +246,7 @@ export default function DisneyRideTracker() {
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: "2px 0 0" }}>Ride Everything Challenge</h1>
         <div style={{ marginTop: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#8e8e93", marginBottom: 4 }}>
-            <span>{allDone}/{ALL_RIDES.length} rides{closed.size > 0 ? ` · ${closed.size} closed` : ""}</span>
+            <span>{riddenCount}/{openRides} rides{closed.size > 0 ? ` · ${closed.size} closed` : ""}</span>
             <span style={{ fontWeight: 700, color: "#007aff" }}>{Math.round(pct)}%</span>
           </div>
           <div style={{ height: 6, borderRadius: 3, background: "#f2f2f7" }}>
@@ -282,7 +284,7 @@ export default function DisneyRideTracker() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={doneRide} style={B("#34c759", "#fff", { flex: 1, fontSize: 16 })}>✓ Complete</button>
-            <button onClick={() => { const llCount = Object.values(rideLog).reduce((s, e) => s + e.filter(x => x.lightningLane).length, 0) + (window._ll ? 1 : 0); shareRide(info?.name, info?.land, info?.parkName, allDone + 1, window._ll, llCount); }} style={B("#1d9bf0", "#fff", { padding: "10px 14px" })}>𝕏</button>
+            <button onClick={() => { const llCount = Object.values(rideLog).reduce((s, e) => s + e.filter(x => x.lightningLane).length, 0) + (window._ll ? 1 : 0); shareRide(info?.name, info?.land, info?.parkName, riddenCount + 1, window._ll, llCount, openRides); }} style={B("#1d9bf0", "#fff", { padding: "10px 14px" })}>𝕏</button>
             <button onClick={cancelRide} style={B("#f2f2f7", "#8e8e93", { border: "1px solid #d1d1d6" })}>✕</button>
           </div>
         </div>
@@ -427,7 +429,7 @@ export default function DisneyRideTracker() {
                     <div><span style={{ color: "#8e8e93" }}>Start </span><span style={{ fontWeight: 600 }}>{fmtTime(e.start)}</span></div>
                     <div><span style={{ color: "#8e8e93" }}>End </span><span style={{ fontWeight: 600 }}>{fmtTime(e.end)}</span></div>
                     <div><span style={{ color: "#8e8e93" }}>Dur </span><span style={{ fontWeight: 600 }}>{fmtDur(e.start, e.end)}</span></div>
-                    <button onClick={() => { const llNum = e.lightningLane ? Object.entries(rideLog).flatMap(([id, ents]) => ents.filter(x => x.lightningLane).map(x => x)).filter(x => new Date(x.end) <= new Date(e.end)).length : 0; shareRide(r?.name, r?.land, r?.parkName, null, e.lightningLane, llNum); }} style={{ marginLeft: "auto", padding: "4px 10px", borderRadius: 6, border: "1px solid #d1d1d6", background: "#fff", color: "#1d9bf0", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>𝕏 Share</button>
+                    <button onClick={() => { const llNum = e.lightningLane ? Object.entries(rideLog).flatMap(([id, ents]) => ents.filter(x => x.lightningLane).map(x => x)).filter(x => new Date(x.end) <= new Date(e.end)).length : 0; shareRide(r?.name, r?.land, r?.parkName, null, e.lightningLane, llNum, openRides); }} style={{ marginLeft: "auto", padding: "4px 10px", borderRadius: 6, border: "1px solid #d1d1d6", background: "#fff", color: "#1d9bf0", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>𝕏 Share</button>
                   </div>
                 </div>
               ))
@@ -460,7 +462,7 @@ export default function DisneyRideTracker() {
                 <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                   <div style={{ flex: 1, padding: "12px 14px", borderRadius: 12, background: "#f2f2f7" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8e8e93", textTransform: "uppercase", letterSpacing: 1 }}>Total Rides</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: "#1c1c1e", marginTop: 2 }}>{allDone}<span style={{ fontSize: 14, fontWeight: 400, color: "#8e8e93" }}>/{ALL_RIDES.length}</span></div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "#1c1c1e", marginTop: 2 }}>{riddenCount}<span style={{ fontSize: 14, fontWeight: 400, color: "#8e8e93" }}>/{openRides}</span></div>
                   </div>
                   <div style={{ flex: 1, padding: "12px 14px", borderRadius: 12, background: "#f2f2f7" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#8e8e93", textTransform: "uppercase", letterSpacing: 1 }}>Day Time</div>
