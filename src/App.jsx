@@ -223,21 +223,12 @@ export default function DisneyRideTracker() {
 
   const B = (bg, fg, x = {}) => ({ padding: "10px 16px", borderRadius: 10, border: "none", background: bg, color: fg, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...x });
 
-  const shareRide = useCallback(async (rideName, land, parkName, rideNum, isLL, llNum) => {
+  const shareRide = useCallback((rideName, land, parkName, rideNum, isLL, llNum) => {
     const parkEmoji = parkName === "Disneyland Park" ? "🏰" : "🎡";
     const llText = isLL ? ` · ⚡ Lightning Lane #${llNum}` : "";
     const text = `🎢 Just rode ${rideName} at ${parkEmoji} ${parkName}!${rideNum ? ` · Ride #${rideNum} of ${ALL_RIDES.length}` : ""}${llText}\n\n#Disneyland #EveryRideDLR @RideEvery\n\nHelp me support @GKTWVillage by donating at the link below.\n\nhttps://give.gktw.org/fundraiser/7070034`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ text });
-        return;
-      } catch (e) {
-        if (e.name === "AbortError") return;
-      }
-    }
     const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(xUrl, "_blank", "width=550,height=420");
+    window.open(xUrl, "_blank");
   }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff", color: "#1c1c1e", fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif" }}>
